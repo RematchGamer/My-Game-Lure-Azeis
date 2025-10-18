@@ -15,6 +15,7 @@ endButton.MouseButton1Click:Connect(function()
 end)
 
 local profileMobs = game.ReplicatedStorage.Profiles[player.Name].Mobs
+
 local mobCases = {
 	["Azeis, Spirit of the Eternal Blossom"] = {c1=Vector3.new(-45,48,-42), c2=Vector3.new(37,48,-54)},
 	["Rekindled Unborn"] = {c1=Vector3.new(200,0,0), c2=Vector3.new(0,0,0)}
