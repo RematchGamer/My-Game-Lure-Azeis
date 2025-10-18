@@ -6,7 +6,7 @@ if barrier then barrier:Destroy() end
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 local endButton = Instance.new("TextButton", gui)
 endButton.Size = UDim2.new(0,100,0,50)
-endButton.Position = UDim2.new(0,10,1,-60) -- bottom left
+endButton.Position = UDim2.new(0,10,1,-60)
 endButton.Text = "Stop"
 
 local running = true
@@ -22,16 +22,19 @@ local mobCases = {
 	["Rekindled Unborn"] = {c1=Vector3.new(200,0,0), c2=Vector3.new(0,0,0)}
 }
 
+-- direct lookup for first existing mob
 local selectedMob, c1, c2
-for name,data in pairs(mobCases) do
+for name in pairs(mobCases) do
 	if mobFolder:FindFirstChild(name) then
-		selectedMob, c1, c2 = name,data.c1,data.c2
+		selectedMob = name
+		c1 = mobCases[name].c1
+		c2 = mobCases[name].c2
 		break
 	end
 end
-if not selectedMob then return end
 
-while running and task.wait(1) do
+local setInterval = 1
+while running and selectedMob and task.wait(setInterval) do
 	local mobFound = mobFolder:FindFirstChild(selectedMob)
 	if mobFound then
 		clickToMove:MoveTo(c1)
@@ -39,3 +42,5 @@ while running and task.wait(1) do
 		clickToMove:MoveTo(c2)
 	end
 end
+
+gui:Destroy()
