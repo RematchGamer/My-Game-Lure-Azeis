@@ -15,17 +15,18 @@ endButton.MouseButton1Click:Connect(function()
 end)
 
 local prof = game.ReplicatedStorage.Profiles[player.Name]
-local mobFolder = prof:FindFirstChild("Mobs")
+local profileMobs = prof:FindFirstChild("Mobs")
+local workspaceMobs = workspace:FindFirstChild("Mobs")
 
 local mobCases = {
 	["Azeis, Spirit of the Eternal Blossom"] = {c1=Vector3.new(-45,48,-42), c2=Vector3.new(37,48,-54)},
 	["Rekindled Unborn"] = {c1=Vector3.new(200,0,0), c2=Vector3.new(0,0,0)}
 }
 
--- direct lookup for first existing mob
+-- direct lookup for first existing mob in profile
 local selectedMob, c1, c2
 for name in pairs(mobCases) do
-	if mobFolder:FindFirstChild(name) then
+	if profileMobs:FindFirstChild(name) then
 		selectedMob = name
 		c1 = mobCases[name].c1
 		c2 = mobCases[name].c2
@@ -35,8 +36,7 @@ end
 
 local setInterval = 1
 while running and selectedMob and task.wait(setInterval) do
-	local mobFound = mobFolder:FindFirstChild(selectedMob)
-	if mobFound then
+	if workspaceMobs:FindFirstChild(selectedMob) then
 		clickToMove:MoveTo(c1)
 	else
 		clickToMove:MoveTo(c2)
