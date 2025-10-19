@@ -4,6 +4,7 @@ local player = Players.LocalPlayer
 local clickToMove = require(player.PlayerScripts:WaitForChild("PlayerModule")):GetClickToMoveController()
 local mobsFolder = workspace:WaitForChild("Mobs")
 local threshold = 10
+local interval = 1
 local running = true
 
 -- Hardcoded mobs
@@ -79,7 +80,7 @@ local function StartLure(c1, c2, mobName)
                 end
             end
 
-            task.wait(0.5)
+            task.wait(interval)
         end
     end)
 end
