@@ -13,7 +13,7 @@ end
 
 -- Hardcoded list of mobs with coordinates
 local mobCases = {
-    ["Azeis, Spirit of the Eternal Blossom"] = {c1 = Vector3.new(-45,48,-42), c2 = Vector3.new(0,48,-48)},
+    ["Azeis, Spirit of the Eternal Blossom"] = {c1 = Vector3.new(-45,48,-42), c2 = Vector3.new(-4,48,-48)},
     ["Rekindled Unborn"] = {c1 = Vector3.new(200,0,0), c2 = Vector3.new(0,0,0)}
 }
 
@@ -27,16 +27,14 @@ local window = library:MakeWindow("Mob Selector")
 
 -- Function to enforce only one checkbox selected at a time
 local function updateSelection(name)
-    if checkboxes then
-        for otherName, cb in pairs(checkboxes) do
-            if cb and otherName ~= name then
-                cb.Checked.Value = false
-            end
+    for otherName, cb in pairs(checkboxes) do
+        if cb and otherName ~= name then
+            cb.Checked.Value = false
         end
     end
     selectedMob = name
-    c1 = mobCases[name].c1
-    c2 = mobCases[name].c2
+    c1 = mobCases[name] and mobCases[name].c1
+    c2 = mobCases[name] and mobCases[name].c2
 end
 
 -- Add checkboxes for each mob
@@ -68,7 +66,10 @@ local function runClickToMoveLoop()
             local target = mobsFolder:FindFirstChild(selectedMob)
             local destination = target and c1 or c2
             if destination and (not lastDestination or (hrp.Position - destination).Magnitude > threshold) then
-                clickToMove:MoveTo(destination)
+                -- Safe call to prevent errors
+                pcall(function()
+                    clickToMove:MoveTo(destination)
+                end)
                 lastDestination = destination
             end
         end
