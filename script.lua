@@ -44,7 +44,9 @@ if selectedMob then
 			clickToMove:MoveTo(c2)
 		end
 	end
+else
+	warn("No mob found within 120 seconds")
 end
-warn("No mob found within 120 seconds")
+
 gui:Destroy()
 return
