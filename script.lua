@@ -49,13 +49,10 @@ end
 -- Cleanup function according to rules
 local function cleanupWorkspace()
     for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            -- Ignore Mobs folder and local player character
-            if not obj:IsDescendantOf(mobsFolder) and not obj:IsDescendantOf(character) then
-                if obj.CanCollide == false then
-                    obj:Destroy()
-                end
-            end
+        if obj:IsA("BasePart") and obj.CanCollide == false and 
+           not obj:IsDescendantOf(mobsFolder) and 
+           not obj:IsDescendantOf(character) then
+            obj:Destroy()
         end
     end
 end
