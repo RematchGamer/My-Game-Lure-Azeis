@@ -13,11 +13,11 @@ end
 
 -- Hardcoded list of mobs with coordinates
 local mobCases = {
-    ["Azeis, Spirit of the Eternal Blossom"] = {c1 = Vector3.new(-45,48,-42), c2 = Vector3.new(37,48,-54)},
+    ["Azeis, Spirit of the Eternal Blossom"] = {c1 = Vector3.new(-45,48,-42), c2 = Vector3.new(0,48,-48)},
     ["Rekindled Unborn"] = {c1 = Vector3.new(200,0,0), c2 = Vector3.new(0,0,0)}
 }
 
-local threshold = 5
+local threshold = 10
 local selectedMob, c1, c2
 local checkboxes = {}
 
