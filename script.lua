@@ -36,7 +36,7 @@ local function cleanupWorkspace()
         if obj:IsA("BasePart") and obj.CanCollide == false and
            not obj:IsDescendantOf(mobsFolder) and
            not obj:IsDescendantOf(char) and
-           obj.Name ~= "HumanoidRootPart" then
+           not game.Players:GetPlayers()[obj.Parent] then
             obj:Destroy()
         end
     end
