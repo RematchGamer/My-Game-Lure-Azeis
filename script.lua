@@ -1,16 +1,10 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local hrp = character:WaitForChild("HumanoidRootPart")
 
-local clickToMove = require(player.PlayerScripts.PlayerModule):GetClickToMoveController()
+local clickToMove = require(player.PlayerScripts:WaitForChild("PlayerModule")):GetClickToMoveController()
 local mobsFolder = workspace:WaitForChild("Mobs")
-
--- Destroy Barrier
-local function removeBarrier()
-    local barrier = workspace:FindFirstChild("Barrier")
-    if barrier then barrier:Destroy() end
-end
+local threshold = 10
+local running = true
 
 -- Hardcoded mobs
 local mobCases = {
@@ -18,12 +12,32 @@ local mobCases = {
     ["Rekindled Unborn"] = {c1 = Vector3.new(200,0,0), c2 = Vector3.new(0,0,0)}
 }
 
-local threshold = 10
-local running = true
+-- Destroy Barrier
+local function removeBarrier()
+    local barrier = workspace:FindFirstChild("Barrier")
+    if barrier then barrier:Destroy() end
+end
 
--- Load GUI library
-local function loadLibrary()
-    return loadstring(game:HttpGet("https://gist.githubusercontent.com/oufguy/62dbf2a4908b3b6a527d5af93e7fca7d/raw/6b2a0ecf0e24bbad7564f7f886c0b8d727843a92/Swordburst%25202%2520KILL%2520AURA%2520GUI(not%2520script)"))()
+-- Dynamic character reference
+local function getCurrentCharacter()
+    return player.Character or player.CharacterAdded:Wait()
+end
+
+local function getHRP()
+    local char = getCurrentCharacter()
+    return char:WaitForChild("HumanoidRootPart")
+end
+
+-- Cleanup function according to rules
+local function cleanupWorkspace()
+    local char = getCurrentCharacter()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.CanCollide == false and
+           not obj:IsDescendantOf(mobsFolder) and
+           not obj:IsDescendantOf(char) then
+            obj:Destroy()
+        end
+    end
 end
 
 -- TEMP stop button
@@ -46,38 +60,33 @@ local function createStopButton()
     end)
 end
 
--- Cleanup function according to rules
-local function cleanupWorkspace()
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and obj.CanCollide == false and 
-           not obj:IsDescendantOf(mobsFolder) and 
-           not obj:IsDescendantOf(character) then
-            obj:Destroy()
-        end
-    end
-end
-
--- Movement logic: walks to c1 if mob exists, else goes to c2 and waits
+-- Movement logic: walks to c1 if mob exists, else goes to c2
 local function StartLure(c1, c2, mobName)
     spawn(function()
         local lastDestination
         while running do
             local mob = mobsFolder:FindFirstChild(mobName)
-            local hrp = character:WaitForChild("HumanoidRootPart")
+            local hrp = getHRP()
             local destination = mob and c1 or c2
+
             if destination and (not lastDestination or (hrp.Position - destination).Magnitude > threshold) then
                 pcall(function()
                     clickToMove:MoveTo(destination)
                 end)
-                -- Run cleanup only when destination changes
                 if destination ~= lastDestination then
                     cleanupWorkspace()
                     lastDestination = destination
                 end
             end
+
             task.wait(0.5)
         end
     end)
+end
+
+-- Load GUI library
+local function loadLibrary()
+    return loadstring(game:HttpGet("https://gist.githubusercontent.com/oufguy/62dbf2a4908b3b6a527d5af93e7fca7d/raw/6b2a0ecf0e24bbad7564f7f886c0b8d727843a92/Swordburst%25202%2520KILL%2520AURA%2520GUI(not%2520script)"))()
 end
 
 -- GUI setup: mob selector
