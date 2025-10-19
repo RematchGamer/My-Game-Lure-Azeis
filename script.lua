@@ -5,6 +5,11 @@ local hrp = character:WaitForChild("HumanoidRootPart")
 
 local clickToMove = require(player.PlayerScripts.PlayerModule):GetClickToMoveController()
 
+-- Destroy Barrier
+if workspace:FindFirstChild("Barrier") then
+    workspace.Barrier:Destroy()
+end
+
 local mobsFolder = workspace:WaitForChild("Mobs")
 
 -- Hardcoded list of mobs with their coordinates
@@ -49,21 +54,4 @@ for name,_ in pairs(mobCases) do
             end
         end
     end)
-    checkboxes[name] = cb
-end
-
--- Main loop
-spawn(function()
-    local lastTarget = nil
-    while true do
-        task.wait(0.5)
-        if selectedMob then
-            local target = mobsFolder:FindFirstChild(selectedMob)
-            local destination = target and c1 or c2
-            if destination and (not lastTarget or (hrp.Position - destination).Magnitude > threshold) then
-                clickToMove:MoveTo(destination)
-                lastTarget = destination
-            end
-        end
-    end
-end)
+    c
