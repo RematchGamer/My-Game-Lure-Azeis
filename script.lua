@@ -6,22 +6,27 @@ local hrp = character:WaitForChild("HumanoidRootPart")
 local clickToMove = require(player.PlayerScripts.PlayerModule):GetClickToMoveController()
 local mobsFolder = workspace:WaitForChild("Mobs")
 
-if workspace:FindFirstChild("Barrier") then
-    workspace.Barrier:Destroy()
+-- Destroy Barrier
+local function removeBarrier()
+    local barrier = workspace:FindFirstChild("Barrier")
+    if barrier then barrier:Destroy() end
 end
 
+-- Hardcoded mobs
 local mobCases = {
     ["Azeis, Spirit of the Eternal Blossom"] = {c1 = Vector3.new(-44,48,-41), c2 = Vector3.new(-4,48,-48)},
     ["Rekindled Unborn"] = {c1 = Vector3.new(200,0,0), c2 = Vector3.new(0,0,0)}
 }
 
 local threshold = 10
-local selectedMob, c1, c2
 local running = true
 
-local library = loadstring(game:HttpGet("https://gist.githubusercontent.com/oufguy/62dbf2a4908b3b6a527d5af93e7fca7d/raw/6b2a0ecf0e24bbad7564f7f886c0b8d727843a92/Swordburst%25202%2520KILL%2520AURA%2520GUI(not%2520script)"))()
-local window = library:MakeWindow("Mob Selector")
+-- Load GUI library
+local function loadLibrary()
+    return loadstring(game:HttpGet("https://gist.githubusercontent.com/oufguy/62dbf2a4908b3b6a527d5af93e7fca7d/raw/6b2a0ecf0e24bbad7564f7f886c0b8d727843a92/Swordburst%25202%2520KILL%2520AURA%2520GUI(not%2520script)"))()
+end
 
+-- TEMP stop button
 local function createStopButton()
     local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
     gui.Name = "StopButtonGUI"
@@ -41,35 +46,72 @@ local function createStopButton()
     end)
 end
 
-local function startMovementLoop()
+-- Cleanup function according to rules
+local function cleanupWorkspace()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            -- Ignore Mobs folder and local player character
+            if not obj:IsDescendantOf(mobsFolder) and not obj:IsDescendantOf(character) then
+                if obj.CanCollide == false then
+                    -- Keep HumanoidRootPart but make neon color
+                    if obj.Name == "HumanoidRootPart" then
+                        obj.BrickColor = BrickColor.new(Color3.fromRGB(255,0,255))
+                        obj.Material = Enum.Material.Neon
+                    else
+                        obj:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- Movement logic: walks to c1 if mob exists, else goes to c2 and waits
+local function StartLure(c1, c2, mobName)
     spawn(function()
-        local lastDestination = nil
+        local lastDestination
         while running do
-            local target = mobsFolder:FindFirstChild(selectedMob)
-            local destination = target and c1 or c2
+            local mob = mobsFolder:FindFirstChild(mobName)
+            local destination = mob and c1 or c2
             if destination and (not lastDestination or (hrp.Position - destination).Magnitude > threshold) then
                 pcall(function()
                     clickToMove:MoveTo(destination)
                 end)
-                lastDestination = destination
+                -- Run cleanup only when destination changes
+                if destination ~= lastDestination then
+                    cleanupWorkspace()
+                    lastDestination = destination
+                end
             end
             task.wait(0.5)
         end
     end)
 end
 
-for name, data in pairs(mobCases) do
-    local cb = window:addCheckbox(name)
-    cb.Checked.Changed:Connect(function()
-        if cb.Checked.Value then
-            selectedMob = name
-            c1 = data.c1
-            c2 = data.c2
-            if window and window.Frame and window.Frame.Parent then
-                window.Frame.Parent:Destroy()
+-- GUI setup: mob selector
+local function setupMobSelector()
+    local library = loadLibrary()
+    local window = library:MakeWindow("Mob Selector")
+
+    for name, data in pairs(mobCases) do
+        local cb = window:addCheckbox(name)
+        cb.Checked.Changed:Connect(function()
+            if cb.Checked.Value then
+                -- start the lure with selected mob and positions
+                StartLure(data.c1, data.c2, name)
+
+                -- close GUI
+                if window and window.Frame and window.Frame.Parent then
+                    window.Frame.Parent:Destroy()
+                end
+
+                -- create TEMP stop button
+                createStopButton()
             end
-            createStopButton()
-            startMovementLoop()
-        end
-    end)
+        end)
+    end
 end
+
+-- Run everything
+removeBarrier()
+setupMobSelector()
