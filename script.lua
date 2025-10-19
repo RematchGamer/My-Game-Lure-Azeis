@@ -53,13 +53,7 @@ local function cleanupWorkspace()
             -- Ignore Mobs folder and local player character
             if not obj:IsDescendantOf(mobsFolder) and not obj:IsDescendantOf(character) then
                 if obj.CanCollide == false then
-                    -- Keep HumanoidRootPart but make neon color
-                    if obj.Name == "HumanoidRootPart" then
-                        obj.BrickColor = BrickColor.new(Color3.fromRGB(255,0,255))
-                        obj.Material = Enum.Material.Neon
-                    else
-                        obj:Destroy()
-                    end
+                    obj:Destroy()
                 end
             end
         end
