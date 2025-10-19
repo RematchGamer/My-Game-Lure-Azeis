@@ -63,6 +63,7 @@ local function StartLure(c1, c2, mobName)
         local lastDestination
         while running do
             local mob = mobsFolder:FindFirstChild(mobName)
+            local hrp = character:WaitForChild("HumanoidRootPart")
             local destination = mob and c1 or c2
             if destination and (not lastDestination or (hrp.Position - destination).Magnitude > threshold) then
                 pcall(function()
