@@ -35,7 +35,8 @@ local function cleanupWorkspace()
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") and obj.CanCollide == false and
            not obj:IsDescendantOf(mobsFolder) and
-           not obj:IsDescendantOf(char) then
+           not obj:IsDescendantOf(char) and
+           obj.Name ~= "HumanoidRootPart" then
             obj:Destroy()
         end
     end
