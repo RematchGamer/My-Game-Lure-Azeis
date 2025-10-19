@@ -27,9 +27,11 @@ local window = library:MakeWindow("Mob Selector")
 
 -- Function to enforce only one checkbox selected at a time
 local function updateSelection(name)
-    for otherName, cb in pairs(checkboxes) do
-        if otherName ~= name then
-            cb.Checked.Value = false
+    if checkboxes then
+        for otherName, cb in pairs(checkboxes) do
+            if cb and otherName ~= name then
+                cb.Checked.Value = false
+            end
         end
     end
     selectedMob = name
@@ -40,6 +42,11 @@ end
 -- Add checkboxes for each mob
 for name,_ in pairs(mobCases) do
     local cb = window:addCheckbox(name)
+    checkboxes[name] = cb
+end
+
+-- Connect the Changed events after all checkboxes are in the table
+for name, cb in pairs(checkboxes) do
     cb.Checked.Changed:Connect(function()
         if cb.Checked.Value then
             updateSelection(name)
@@ -51,24 +58,22 @@ for name,_ in pairs(mobCases) do
             end
         end
     end)
-    checkboxes[name] = cb
 end
 
--- Main loop wrapped in a function
+-- Main ClickToMove loop
 local function runClickToMoveLoop()
-    while selectedMob do
-        if mobsFolder:FindFirstChild(selectedMob) then
-            if (hrp.Position - c1).Magnitude > threshold then
-                clickToMove:MoveTo(c1)
-            end
-        else
-            if (hrp.Position - c2).Magnitude > threshold then
-                clickToMove:MoveTo(c2)
+    local lastDestination = nil
+    while true do
+        if selectedMob then
+            local target = mobsFolder:FindFirstChild(selectedMob)
+            local destination = target and c1 or c2
+            if destination and (not lastDestination or (hrp.Position - destination).Magnitude > threshold) then
+                clickToMove:MoveTo(destination)
+                lastDestination = destination
             end
         end
         task.wait(0.5)
     end
 end
 
--- Start the loop
 spawn(runClickToMoveLoop)
